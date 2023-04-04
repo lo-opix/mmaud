@@ -14,8 +14,8 @@ outdated ones.
 4. The program will download all the mods from google drive and put them in the `Appdata/.minecraft/mods` folder
 
 ## ToDo
-- [ ] Add a Menu page at first start
-- [ ] Add settings page
+- [x] Add a Menu page at first start
+- [x] Add settings page
 - [ ] Add languages
 
 ## Contributing
@@ -24,3 +24,7 @@ If you want to contribute, you can do so by opening a pull request or an issue.
 
 ## Used third-party tools
 - [Json](https://github.com/nlohmann/json) for parsing Google Drive HTTP responses 
+
+## Known issues
+- If the API_KEY is invalid, the program will skip the verification of mods and launch minecraft
+- The language setting don't work yet

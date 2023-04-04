@@ -4,7 +4,8 @@
 #include <nlohmann/json.hpp>
 #include <chrono>
 #include <thread>
-#include <Windows.h>
+#include "ConsoleMenus.h"
+#include "Settings.h"
 
 using namespace std;
 using json = nlohmann::json;
@@ -16,7 +17,20 @@ string base_url("https://www.googleapis.com/drive/v3/files");
 string folder_id("10vlr2Qop6rXrLxIHZcCHFwR1-QxeSmv2");
 string api_key("API_KEY");
 string mods_folder("");
+string language("");
 
+void setSettings() {
+	#pragma warning(suppress : 4996)
+	string user_folder = getenv("USERPROFILE");
+
+	string** settings = Settings::ReadSettingsFile(user_folder);
+	for (int i = 0; i < sizeof(settings)/sizeof(settings[0]); i++) {
+		if (settings[i][0] == "mods_folder") 
+			mods_folder = settings[i][1];
+		else if (settings[i][0] == "language") 
+			language = settings[i][1];
+	}
+}
 
 
 std::string getAppDataPath() {
@@ -139,7 +153,8 @@ string retrieve_remote_files_index()
 	return remote_index_file_name;
 }
 
-int main() {
+//Download_Minecaft_mods core
+int DownloadMinecaftModsCore() {
 	string remote_index_filename = retrieve_remote_files_index();
 	fs::path fullPath = fs::current_path() / remote_index_filename;
 
@@ -157,8 +172,33 @@ int main() {
 
 	std::this_thread::sleep_for(std::chrono::seconds(timeout_seconds));
 
-	FreeConsole();
+	return 0;
+}
 
+//For show the Ui after opening settings
+int ShowConsoleUI() {
+	int result = UI::RunConsoleUi();
+	switch (result) {
+	case 0: // exit
+		return 0;
+	case 1: // Download and launch
+		cout << "" << endl;// Line Break
+		DownloadMinecaftModsCore();
+		return 0;
+	case 2: // Settings
+		cout << "\033[1;31m" << "Please restart the program to apply the changes" << "\033[0m" << endl;
+
+		int timeout_seconds = 10;
+		std::this_thread::sleep_for(std::chrono::seconds(timeout_seconds));
+
+		return 0;
+	}
+}
+
+
+int main() {
+	setSettings();
+	ShowConsoleUI();
 
 	return 0;
 }
