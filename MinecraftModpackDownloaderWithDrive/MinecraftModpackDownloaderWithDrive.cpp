@@ -14,12 +14,12 @@ namespace fs = std::filesystem;
 const string MINECRAFT_LAUNCH_COMMAND("explorer.exe shell:appsFolder\\Microsoft.4297127D64EC6_8wekyb3d8bbwe!Minecraft");
 
 string base_url("https://www.googleapis.com/drive/v3/files");
-string folder_id("10vlr2Qop6rXrLxIHZcCHFwR1-QxeSmv2");
+string folder_id("");
 string api_key("API_KEY");
 string mods_folder("");
 string language("");
 
-void setSettings() {
+int setSettings() {
 	#pragma warning(suppress : 4996)
 	string user_folder = getenv("USERPROFILE");
 
@@ -29,7 +29,17 @@ void setSettings() {
 			mods_folder = settings[i][1];
 		else if (settings[i][0] == "language") 
 			language = settings[i][1];
+		else if (settings[i][0] == "google_drive_folder_id")
+			folder_id = settings[i][1];
+		
 	}
+
+	if (folder_id == "") {
+		cerr << "\033[1;31m" << "ERROR: Please set google_drive_folder_id in settings.txt" << "\033[0m" << endl;
+		return 1;
+	}
+
+	return 0;
 }
 
 
@@ -176,8 +186,8 @@ int DownloadMinecaftModsCore() {
 }
 
 //For show the Ui after opening settings
-int ShowConsoleUI() {
-	int result = UI::RunConsoleUi();
+int ShowConsoleUI(bool clear_at_start) {
+	int result = UI::RunConsoleUi(clear_at_start);
 	switch (result) {
 	case 0: // exit
 		return 0;
@@ -197,8 +207,17 @@ int ShowConsoleUI() {
 
 
 int main() {
-	setSettings();
-	ShowConsoleUI();
+	int result = setSettings();
+
+	if (result == 0) {
+		ShowConsoleUI(1);
+	}
+	else if (result == 1) {
+		ShowConsoleUI(0);
+	}
+	else {
+		cerr << "\033[1;31m" << "Error while setting settings" << "\033[0m" << endl;
+	}
 
 	return 0;
 }

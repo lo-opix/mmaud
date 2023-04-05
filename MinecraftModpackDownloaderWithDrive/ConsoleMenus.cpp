@@ -9,9 +9,11 @@ namespace fs = std::filesystem;
 using namespace std;
 
 // Prints the main menu of the program to the console
-void UI::PrintMainMenu() {
-	system("cls");
-	cout << "Minecraft Modpack Auto Updater and Downloader" << endl;
+void UI::PrintMainMenu(bool clear_at_start) {
+	if (clear_at_start) {
+		system("cls");
+		cout << "Minecraft Modpack Auto Updater and Downloader" << endl;
+	}
 	cout << "================================================" << endl;
 	cout << "1. Download mods" << endl;
 	cout << "2. Settings" << endl;
@@ -31,11 +33,11 @@ string GetMenuChoice() {
 Runs the main menu of the program.
 Returns: 0=exit, 1=download mods, 2=settings
 */
-int UI::RunConsoleUi() {
+int UI::RunConsoleUi(bool clear_at_start) {
 	#pragma warning(suppress : 4996)
 	string user_folder = getenv("USERPROFILE");
 
-	PrintMainMenu();
+	UI::PrintMainMenu(clear_at_start);
 	string choice = GetMenuChoice();
 	if (choice == "1") {
 		cout << "Start downloading process" << endl;

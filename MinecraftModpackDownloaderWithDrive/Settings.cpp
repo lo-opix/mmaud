@@ -15,7 +15,8 @@ int Settings::CreateSettingsFile(string user_folder) {
 	ofstream settings_file(settings_file_path);
 	if (settings_file.is_open()) {
 		settings_file << "mods_folder=" + user_folder + "\\Appdata\\Roaming\\.minecraft\\mods\n";
-		settings_file << "language=en";
+		settings_file << "language=en\n";
+		settings_file << "google_drive_folder_id=";
 		settings_file.close();
 		return 0;
 	}

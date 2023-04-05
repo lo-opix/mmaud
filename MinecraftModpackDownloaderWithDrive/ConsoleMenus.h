@@ -11,8 +11,8 @@
 
 
 namespace UI {
-	void PrintMainMenu();
-	int RunConsoleUi();
+	void PrintMainMenu(bool clear_at_start);
+	int RunConsoleUi(bool clear_at_start);
 }
 
 #endif // CONSOLE_MENUS_H
