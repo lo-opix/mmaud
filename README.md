@@ -17,7 +17,7 @@ outdated ones.
 - [x] Add a Menu page at first start
 - [x] Add settings page
 - [ ] Add languages
-- [ ] Add option for the google drive remote id
+- [x] Add option for the google drive remote id
 
 ## Contributing
 
