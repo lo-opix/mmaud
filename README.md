@@ -8,7 +8,7 @@ outdated ones.
 ## Usage
 ### As a Player
 
-1. Download the latest release from the [releases page](releases/latest)
+1. Download the latest release from the [releases page](https://github.com/lo-opix/mmaud/releases/)
 2. Execute the .exe file
 3. Windows will show you a warning, click "More info" and then "Run anyway".
 >If you don't want to do this, you can compile the program yourself
@@ -24,7 +24,7 @@ outdated ones.
  * You need to provide the id of your google drive folder which contains the mods.
 You can get the id from the url of the folder: 
  * In this url `https://drive.google.com/drive/folders/1Z2X3C4V5B6N7M8K9J0H1G2F3D4S5A6Q7?usp=sharing` the id is `1Z2X3C4V5B6N7M8K9J0H1G2F3D4S5A6Q7`
-
+>Please note that your folder have to be set on enveryone that have the link can view the folder
 
 ## ToDo
 - [x] Add a Menu page at first start
