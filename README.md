@@ -24,6 +24,7 @@ outdated ones.
  * You need to provide the id of your google drive folder which contains the mods.
 You can get the id from the url of the folder: 
  * In this url `https://drive.google.com/drive/folders/1Z2X3C4V5B6N7M8K9J0H1G2F3D4S5A6Q7?usp=sharing` the id is `1Z2X3C4V5B6N7M8K9J0H1G2F3D4S5A6Q7`
+ * Rename the folder to the name of your server
 >Please note that your folder have to be set on enveryone that have the link can view the folder
 
 ## ToDo

@@ -19,6 +19,26 @@ string api_key("API_KEY");
 string mods_folder("");
 string language("");
 
+string retrieve_remote_folder_name() {
+	string folder_name_file = "folder_name.json";
+	string args = folder_id + "?key=" + api_key + "&fields=name";
+
+	string request_command = "curl -s -o " + folder_name_file + " \"" + base_url + "/" + args + "\"";
+
+	int result = system(request_command.c_str());
+
+	if (result == 0) {
+		ifstream folder_name_stream(folder_name_file);
+		json parsed_folder_name = json::parse(folder_name_stream);
+		return parsed_folder_name.value("name", "Not Found");
+	}
+	else {
+		return "Not Found";
+	}
+
+	remove("folder_name.json");
+}
+
 int setSettings() {
 	#pragma warning(suppress : 4996)
 	string user_folder = getenv("USERPROFILE");
@@ -210,9 +230,12 @@ int ShowConsoleUI(bool clear_at_start) {
 
 int main() {
 	int result = setSettings();
+	string remote_folder_name = retrieve_remote_folder_name();
+
+	cout << "Configured for: " << remote_folder_name << endl;
 
 	if (result == 0) {
-		ShowConsoleUI(1);
+		ShowConsoleUI(0);
 	}
 	else if (result == 1) {
 		ShowConsoleUI(0);
