@@ -6,7 +6,7 @@
 #include <filesystem>
 
 namespace Settings {
-	const int max_settings(2);
+	const int max_settings(3);
 	// Creates a settings file in the local Appdata directory if it doesn't already exist and writes default settings to it. Returns 0 on success, 1 on failure.
 	int CreateSettingsFile(std::string user_folder);
 	// Creates a settings folder in the local Appdata directory if it doesn't already exist. Returns 0 on success, 1 on failure.

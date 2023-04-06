@@ -24,14 +24,16 @@ int setSettings() {
 	string user_folder = getenv("USERPROFILE");
 
 	string** settings = Settings::ReadSettingsFile(user_folder);
-	for (int i = 0; i < sizeof(settings)/sizeof(settings[0]); i++) {
+
+	for (int i = 0; i < (sizeof(settings) / 2.0) - 1; i++) { // diveided by 2 because they are 2 columns by row; -1 because the last blank line in counted
+
 		if (settings[i][0] == "mods_folder") 
 			mods_folder = settings[i][1];
 		else if (settings[i][0] == "language") 
 			language = settings[i][1];
-		else if (settings[i][0] == "google_drive_folder_id")
+		else if (settings[i][0] == "google_drive_folder_id") 
 			folder_id = settings[i][1];
-		
+
 	}
 
 	if (folder_id == "") {
