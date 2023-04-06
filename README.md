@@ -8,7 +8,7 @@ outdated ones.
 ## Usage
 ### As a Player
 
-1. Download the latest release from the [releases page](releases/latest)
+1. Download the latest release from the [releases page](https://github.com/lo-opix/mmaud/releases/)
 2. Execute the .exe file
 3. Windows will show you a warning, click "More info" and then "Run anyway".
 >If you don't want to do this, you can compile the program yourself
