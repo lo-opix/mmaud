@@ -1,4 +1,9 @@
-﻿#include <cstdlib>
+﻿/*TODO:
+* Remove temp files
+*/
+
+
+#include <cstdlib>
 #include <iostream>
 #include <fstream>
 #include <nlohmann/json.hpp>
@@ -11,13 +16,23 @@ using namespace std;
 using json = nlohmann::json;
 namespace fs = std::filesystem;
 
+#if defined(_WIN64)
+bool ON_WINDOWS = true;
+#else
+bool ON_WINDOWS = false;
+#endif
+
+
 const string MINECRAFT_LAUNCH_COMMAND("explorer.exe shell:appsFolder\\Microsoft.4297127D64EC6_8wekyb3d8bbwe!Minecraft");
 
 string base_url("https://www.googleapis.com/drive/v3/files");
-string folder_id("");
+string folder_id(""); 
 string api_key("API_KEY");
-string mods_folder("");
+string mods_folder(""); // Equal to C:\Users\USERNAME\AppData\Roaming\.minecraft\mods
 string language("");
+
+#pragma warning(suppress : 4996)
+string user_folder = getenv("USERPROFILE"); // Equal to C:\Users\USERNAME
 
 string retrieve_remote_folder_name() {
 	string folder_name_file = "folder_name.json";
@@ -30,19 +45,16 @@ string retrieve_remote_folder_name() {
 	if (result == 0) {
 		ifstream folder_name_stream(folder_name_file);
 		json parsed_folder_name = json::parse(folder_name_stream);
+		remove("folder_name.json");
 		return parsed_folder_name.value("name", "Not Found");
 	}
 	else {
+		remove("folder_name.json");
 		return "Not Found";
 	}
-
-	remove("folder_name.json");
 }
 
 int setSettings() {
-	#pragma warning(suppress : 4996)
-	string user_folder = getenv("USERPROFILE");
-
 	string** settings = Settings::ReadSettingsFile(user_folder);
 
 	for (int i = 0; i < (sizeof(settings) / 2.0) - 1; i++) { // diveided by 2 because they are 2 columns by row; -1 because the last blank line in counted
@@ -113,30 +125,43 @@ vector<string> get_local_files(std::string folder_path) {
 	return jar_files;
 }
 
-void check_files_to_dl(string remote_index_file_name) {
+
+void check_mods(string remote_index_file_name) {
+	
 
 	ifstream remote_index_stream(remote_index_file_name);
 	json parsed_remote_index = json::parse(remote_index_stream);
 
-	size_t local_jar_files_size(0);
-	vector<string> local_jar_files = get_local_files("C:/Users/Max/AppData/Roaming/.minecraft/mods/");
-	local_jar_files_size = local_jar_files.size();
+	vector<string> local_jar_files = get_local_files(mods_folder);
 
-	cout << "Local files count: " << local_jar_files_size << endl;
-	//compare
+	cout << "Local files count: " << local_jar_files.size() << endl;
 	cout << "Remote files count: " << parsed_remote_index["files"].size() << endl;
-	
+
+
 	for (size_t i = 0; i < parsed_remote_index["files"].size(); i++) {
-	
+		cout << "------------------------" << endl;
+
 		string filename = parsed_remote_index["files"][i].value("name", "Not Found");
 		string file_id = parsed_remote_index["files"][i].value("id", "Not Found");
 
-		cout << "File name: " + filename + "... ";
+		string temp_filename = filename;
+
+
+		if (temp_filename.erase(5, temp_filename.length()) == "forge") {
+			cout << "File detected is forge" << endl;
+			continue;
+		}
+
+		cout << "File name " << i+1 << "/" << parsed_remote_index["files"].size() << ": " + filename + "... ";
 
 		//search in all the local files the current remote file
-		bool is_file_present(0);
+		bool is_file_present = false;
 
-		for (size_t j = 0; j < local_jar_files_size; j++) { // ERROR: local_jar_files_size is 0
+		for (size_t j = 0; j < local_jar_files.size(); j++) {
+			if (local_jar_files[j].at(0) == '/' || local_jar_files[j].at(0) == '\\') {
+				local_jar_files[j].erase(0, 1);
+			}
+
 			if (filename == local_jar_files[j]) {
 				is_file_present = true;
 				cout << "\033[1;32m" << "Found!" << "\033[0m" << endl;
@@ -144,19 +169,85 @@ void check_files_to_dl(string remote_index_file_name) {
 			}
 		}
 
-		if (!is_file_present) {
+		if (is_file_present == false) {
 			cout << "\033[1;31m" << "Not found" << "\033[0m" << endl;
 			try {
 				std::string appdata_path = getAppDataPath();
-				dl_file(appdata_path + "/.minecraft/mods/" + filename, file_id);
+				dl_file(appdata_path + "\\.minecraft\\mods\\" + filename, file_id);
 			}
 			catch (const std::exception& ex) {
 				std::cerr << "Error: " << ex.what() << std::endl;
 				break;
 			}
-			
+
 		}
-		
+
+	}
+	
+	local_jar_files.clear();
+
+}
+
+
+// Returns: 0 -> up to date; 1 -> forge just installed
+int check_forge(string remote_index_file_name) {
+	ifstream remote_index_stream(remote_index_file_name);
+	json parsed_remote_index = json::parse(remote_index_stream);
+
+
+	//Check if the correct version for forge is installed
+	for (size_t i = 0; i < parsed_remote_index["files"].size(); i++) {
+		string filename = parsed_remote_index["files"][i].value("name", "Not Found");
+		string file_id = parsed_remote_index["files"][i].value("id", "Not Found");
+		string temp_filename = filename;
+
+		// Check if the 5 first letters of the file name are "forge"
+		if (temp_filename.erase(5, temp_filename.length()) == "forge") {
+
+			temp_filename = filename;
+			string forge_version = temp_filename.erase(0, 6).erase(temp_filename.find_last_of("-"), temp_filename.length());
+
+			cout << "Forge version needed: " << forge_version << endl; // Sould look like "1.16.5-36.1.0"
+			temp_filename = filename;
+			string temp_forge_v = forge_version;
+			string forge_id_version = temp_forge_v.erase(0, temp_forge_v.find_last_of("-") + 1);
+			temp_filename = filename;
+			temp_forge_v = forge_version;
+			string forge_minecraft_version = temp_forge_v.erase(temp_forge_v.find_last_of("-"), temp_forge_v.length());
+
+			//now in versions/ if 1.18.2-forge-40.2.0 folder exists, then forge is up to date (dl not needed)
+			if (fs::exists(user_folder + "\\AppData\\Roaming\\.minecraft\\versions\\" + forge_minecraft_version + "-forge-" + forge_id_version)) {
+				cout << "Forge is up to date" << endl;
+				return 0;
+			}
+			else {
+				dl_file(mods_folder + "\\" + filename, file_id);
+
+				// Execute .jar installer
+				cout << "Please install forge by the windows which will apear..." << endl;
+				string command = "java -jar " + mods_folder + "\\" + filename;
+				system(command.c_str());
+				return 1;
+			}
+
+		}
+	}
+
+	return 2; // Error Unhandled
+}
+
+int check_mods_folder(string remote_index_file_name) {
+
+	ifstream remote_index_stream(remote_index_file_name);
+	json parsed_remote_index = json::parse(remote_index_stream);
+
+	if (fs::exists(mods_folder)) {
+		cout << "Mods folder exist" << endl;
+		return 0;		
+	}
+	else {
+		cout << "Mods folder not found" << endl;
+		return 1;
 	}
 }
 
@@ -190,13 +281,31 @@ int DownloadMinecaftModsCore() {
 	string remote_index_filename = retrieve_remote_files_index();
 	fs::path fullPath = fs::current_path() / remote_index_filename;
 
-	check_files_to_dl(fullPath.string());
+	int result = check_mods_folder(remote_index_filename);
+	
+	if (result == 0) {
+		check_forge(remote_index_filename);
+		check_mods(remote_index_filename);
+		// launch minecraft
+		cout << "\033[1;32m" << "Launching Minecraft... " << "\033[0m" << endl;
+		system(MINECRAFT_LAUNCH_COMMAND.c_str());
+	}
+	else {
+		fs::create_directory(mods_folder);
+		if (check_forge(remote_index_filename) == 1) {
+			cout << "\033[1;32m" << "Please launch minecraft with forge configuration once to generate forge files" << "\033[0m" << endl;
+			std::this_thread::sleep_for(std::chrono::seconds(2));
+			cout << "\033[1;32m" << "Launching Minecraft... " << "\033[0m" << endl;
+			system(MINECRAFT_LAUNCH_COMMAND.c_str());
+		}
+		else {
+			check_mods(remote_index_filename);
+			cout << "\033[1;32m" << "Launching Minecraft... " << "\033[0m" << endl;
+			system(MINECRAFT_LAUNCH_COMMAND.c_str());
+		}
+	}
 
 	remove("temp_data.json");
-
-	// launch minecraft
-	cout << "\033[1;32m" << "Launching Minecraft... " << "\033[0m" << endl;
-	system(MINECRAFT_LAUNCH_COMMAND.c_str());
 
 	int timeout_seconds = 5;
 
@@ -210,39 +319,44 @@ int DownloadMinecaftModsCore() {
 //For show the Ui after opening settings
 int ShowConsoleUI(bool clear_at_start) {
 	int result = UI::RunConsoleUi(clear_at_start);
+	int timeout_seconds = 10;
+
 	switch (result) {
-	case 0: // exit
-		return 0;
-	case 1: // Download and launch
-		cout << "" << endl;// Line Break
-		DownloadMinecaftModsCore();
-		return 0;
-	case 2: // Settings
-		cout << "\033[1;31m" << "Please restart the program to apply the changes" << "\033[0m" << endl;
-
-		int timeout_seconds = 10;
-		std::this_thread::sleep_for(std::chrono::seconds(timeout_seconds));
-
-		return 0;
+		case 0: // exit
+			return 0;
+		case 1: // Download and launch
+			cout << "" << endl;// Line Break
+			DownloadMinecaftModsCore();
+			return 0;
+		case 2: // Settings
+			cout << "\033[1;31m" << "Please restart the program to apply the changes" << "\033[0m" << endl;
+			std::this_thread::sleep_for(std::chrono::seconds(timeout_seconds));
+			return 0;
+		default:
+			return 0;
 	}
 }
 
 
 int main() {
-	int result = setSettings();
-	string remote_folder_name = retrieve_remote_folder_name();
+	if (ON_WINDOWS) {
+		int result = setSettings();
+		string remote_folder_name = retrieve_remote_folder_name();
 
-	cout << "Configured for: " << remote_folder_name << endl;
+		cout << "Configured for: " << remote_folder_name << endl;
 
-	if (result == 0) {
-		ShowConsoleUI(0);
-	}
-	else if (result == 1) {
-		ShowConsoleUI(0);
+		if (result == 0) {
+			ShowConsoleUI(0);
+		}
+		else if (result == 1) {
+			ShowConsoleUI(0);
+		}
+		else {
+			cerr << "\033[1;31m" << "Error while setting settings" << "\033[0m" << endl;
+		}
 	}
 	else {
-		cerr << "\033[1;31m" << "Error while setting settings" << "\033[0m" << endl;
+		cout << "Please run this program on a Windows X64 system" << endl;
 	}
-
 	return 0;
 }
