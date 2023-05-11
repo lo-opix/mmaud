@@ -5,6 +5,11 @@ It compares the local mod files with the remote ones and downloads any missing o
 outdated ones.
 <hr>
 
+### Aussi disponible en [Francais](README_FR.md)
+
+<hr>
+
+
 ## Requirements
 - Windows 10 64 bit or higher
 - Java 8 or higher
