@@ -27,7 +27,7 @@ const string MINECRAFT_LAUNCH_COMMAND("explorer.exe shell:appsFolder\\Microsoft.
 
 string base_url("https://www.googleapis.com/drive/v3/files");
 string folder_id(""); 
-string api_key("API_KEY");
+string api_key("AIzaSyC4qR1jMIs8yxe8WoHSYvKJzYuv4r1EfFQ");
 string mods_folder(""); // Equal to C:\Users\USERNAME\AppData\Roaming\.minecraft\mods
 string language("");
 

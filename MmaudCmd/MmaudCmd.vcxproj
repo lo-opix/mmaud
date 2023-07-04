@@ -22,8 +22,9 @@
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
     <ProjectGuid>{f5d46bd9-f76b-4a80-8240-83f72428fb67}</ProjectGuid>
-    <RootNamespace>MinecraftModpackDownloaderWithDrive</RootNamespace>
+    <RootNamespace>MmaudCmd</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>MmaudCmd</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -130,7 +131,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="ConsoleMenus.cpp" />
-    <ClCompile Include="MinecraftModpackDownloaderWithDrive.cpp" />
+    <ClCompile Include="MmaudCmd.cpp" />
     <ClCompile Include="Settings.cpp" />
   </ItemGroup>
   <ItemGroup>
